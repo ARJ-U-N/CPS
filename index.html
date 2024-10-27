@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,11 +95,11 @@
                         <div class="row mt-3">
                             <div class="col-lg-3 col-md-6 mb-3">
                                 <h6 align="left">Copies</h6>
-                                <input type="text" class="form-control" name="copies" required>
+                                <input type="number" class="form-control" name="copies" required onchange="calculateAmount()">
                             </div>
                             <div class="col-lg-3 col-md-6 mb-3">
                                 <h6 align="left">Type</h6>
-                                <select class="form-control" name="type" required>
+                                <select class="form-control" name="type" required onchange="calculateAmount()">
                                     <option value="" disabled selected>Type</option>
                                     <option value="type1">Book Type</option>
                                     <option value="type2">Normal</option>
@@ -118,14 +117,16 @@
                                 <h6 align="left">College Name</h6>
                                 <select class="form-control" name="textBox1" required>
                                     <option value="" disabled selected>Select Option</option>
-                                    <option value="option1">Option 1</option>
-                                    <option value="option2">Option 2</option>
-                                    <option value="option3">Option 3</option>
+                                    <option value="option1">NCAS</option>
+                                    <option value="option2">NCHS</option>
+                                    <option value="option3">Poly</option>
+                                    <option value="option3">Managment</option>
+                                    <option value="option3">Engineering</option>
                                 </select>
                             </div>
                             <div class="col-lg-8 col-md-6 mb-3">
                                 <br><h6 align="left">Department Name</h6>
-                                <input type="text" class="form-control" placeholder="Text Box 2" name="textBox2" required>
+                                <input type="text" class="form-control" placeholder="enter department name" name="textBox2" required>
                             </div>
                         </div>
                     </div>
@@ -137,6 +138,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
+        let pageCount = 0; // Initialize pageCount variable
+
         function checkFileSize(input) {
             const file = input.files[0];
             const maxSizeMB = 50; // Set the limit to 50 MB
@@ -153,47 +156,55 @@
             reader.onload = function() {
                 const typedarray = new Uint8Array(this.result);
                 pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
-                    const pageCount = pdf.numPages;
-                    const totalAmount = pageCount * 2; // ₹2 per page
-                    document.getElementById('totalAmount').innerText = totalAmount; // Display total amount
+                    pageCount = pdf.numPages; // Update pageCount with the number of pages
+                    calculateAmount(); // Calculate amount based on pageCount
                 });
             };
             reader.readAsArrayBuffer(file);
         }
 
+        function calculateAmount() {
+            const copies = parseInt(document.querySelector('[name="copies"]').value, 10) || 0;
+            const type = document.querySelector('[name="type"]').value;
+
+            let totalAmount = 0;
+
+            // Calculate amount based on type and pageCount
+            switch (type) {
+                case 'type1': // Book Type
+                    totalAmount = (pageCount / 2) * copies; // Divide by 2 and multiply by copies
+                    break;
+                case 'type2': // Normal
+                    totalAmount = pageCount * copies; // No change, multiply by copies
+                    break;
+                case 'type3': // Single side
+                    totalAmount = (pageCount * 2) * copies; // Multiply by 2 and by copies
+                    break;
+            }
+
+            // Update the displayed total amount
+            document.getElementById('totalAmount').innerText = totalAmount;
+        }
+
         function validateForm() {
             const form = document.getElementById('pdfForm');
             if (form.checkValidity()) {
-                const copies = form.copies.value;
+                const copies = parseInt(form.copies.value, 10);
                 const type = form.type.value;
                 const college = form.textBox1.value;
                 const department = form.textBox2.value;
 
-                const pageCount = parseInt(document.getElementById('totalAmount').innerText) / 2; // Assuming ₹2 per page
-                let totalAmount = 0;
-
-                // Calculate amount based on type
-                switch (type) {
-                    case 'type1': // Book Type
-                        totalAmount = pageCount / 2; // Divide by 2
-                        break;
-                    case 'type2': // Normal
-                        totalAmount = pageCount; // No change
-                        break;
-                    case 'type3': // Single side
-                        totalAmount = pageCount * 2; // Multiply by 2
-                        break;
-                }
+                const totalAmount = parseInt(document.getElementById('totalAmount').innerText, 10); // Get the total amount from display
 
                 // Prompt the user for the correct amount
                 const userAmount = prompt(`Please send the amount of ₹${totalAmount}. Enter the amount sent:`);
 
                 if (userAmount && parseFloat(userAmount) === totalAmount) {
                     const message = `Copies: ${copies}\nType: ${type}\nCollege: ${college}\nDepartment: ${department}`;
-                    const whatsappNumber = '1234567890'; // Replace with your WhatsApp number
+                    const whatsappNumber = '9061374498'; // Replace with your WhatsApp number
                     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-                    window.location.href = "https://pay.google.com/gp/p/your_payment_link_here"; // Redirect to Google Pay link
+                    window.location.href = "https://link.upilink.in/mohammed.naveed2308@okhdfcbank"; // Redirect to Google Pay link
                     setTimeout(() => {
                         window.open(whatsappLink, '_blank');
                     }, 3000); // Delay to allow payment process
