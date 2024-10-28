@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload PDF Example</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -13,7 +12,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Full height for vertical centering */
+            height: 100vh;
+            position: relative;
+            
         }
         .carousel-background {
             position: absolute;
@@ -22,21 +23,46 @@
             right: 0;
             bottom: 0;
             clip-path: polygon(0 0, 100% 0, 0 100%);
-            z-index: -1; /* Send background behind other content */
+            z-index: -1;
         }
         .carousel-inner {
             height: 100%;
         }
         .carousel-item {
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            height: auto;
         }
         .carousel-item img {
             width: 100%;
             height: auto;
             object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            .carousel-background {
+                clip-path: none;
+                bottom: 10%;
+            }
+            .carousel-item {
+                height: 200px;
+            }
+            .carousel-item img {
+                height: 100%;
+                object-fit: cover;
+            }
+            .upload-header {
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1;
+            }
+            .upload-header img {
+                width: 50px;
+                height: 50px;
+            }
+            body{
+                background: #000;
+            }
+          
         }
         .container {
             position: relative; 
@@ -48,19 +74,20 @@
             border-radius: 10px; 
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
             padding: 30px; 
-        }
-        .upload-area {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin-top: 30%; /* Space for the upload header */
         }
         .upload-button {
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px; /* Space below the button */
         }
         .carousel-control-prev,
         .carousel-control-next {
-            display: none; /* Hide the controls */
+            display: none; 
         }
+       
     </style>
 </head>
 <body>
@@ -80,18 +107,29 @@
         </div>
     </div>
 
+    <!-- Upload section for small screens -->
+    <div class="upload-header d-md-none">
+        <label for="pdfUpload">
+            <img src="https://cdn-icons-png.freepik.com/256/12096/12096110.png?semt=ais_hybrid" alt="Upload PDF" >
+        </label>
+        <h4 >Upload Your PDF Document</h4>
+        <input type="file" id="pdfUpload" name="pdfFile" accept="application/pdf" required style="display: none;" onchange="checkFileSize(this)">
+    </div>
+
     <div class="container">
         <div class="form-container">
-            <form id="pdfForm" action="upload.php" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <!-- Upload section for medium and large screens -->
+            <div class="upload-button d-none d-md-flex">
+                <label for="pdfUpload">
+                    <img src="https://cdn-icons-png.freepik.com/256/12096/12096110.png?semt=ais_hybrid" alt="Upload PDF">
+                </label>
+                <h4>Upload Your PDF Document</h4>
+                <input type="file" id="pdfUpload" name="pdfFile" accept="application/pdf" required style="display: none;" onchange="checkFileSize(this)">
+            </div>
+
+            <form id="pdfForm" onsubmit="return redirectToPayment()">
                 <div class="row mb-4">
                     <div class="col-lg-6 col-md-12">
-                        <h1 class="mb-4">Upload Your PDF Document</h1>
-                        <div class="upload-area">
-                            <label for="pdfUpload" class="upload-button">
-                                <img src="https://cdn-icons-png.freepik.com/256/12096/12096110.png?semt=ais_hybrid" alt="Upload PDF" class="img-fluid" style="width: 100px; height: 100px; border-radius: 50%;">
-                            </label>
-                            <input type="file" id="pdfUpload" name="pdfFile" accept="application/pdf" required style="display: none;" onchange="checkFileSize(this)">
-                        </div>
                         <div class="row mt-3">
                             <div class="col-lg-3 col-md-6 mb-3">
                                 <h6 align="left">Copies</h6>
@@ -112,7 +150,9 @@
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-12">
-                        <div class="row">
+                        <h6 class="mb-4" align="left">Usage Count</h6>
+                        <input type="number" id="usageCount" class="form-control" value="1" readonly>
+                        <div class="row mt-3">
                             <div class="col-lg-8 col-md-6 mb-3">
                                 <h6 align="left">College Name</h6>
                                 <select class="form-control" name="textBox1" required>
@@ -120,25 +160,38 @@
                                     <option value="option1">NCAS</option>
                                     <option value="option2">NCHS</option>
                                     <option value="option3">Poly</option>
-                                    <option value="option3">Managment</option>
-                                    <option value="option3">Engineering</option>
+                                    <option value="option4">Management</option>
+                                    <option value="option5">Engineering</option>
                                 </select>
-                            </div>
-                            <div class="col-lg-8 col-md-6 mb-3">
-                                <br><h6 align="left">Department Name</h6>
-                                <input type="text" class="form-control" placeholder="enter department name" name="textBox2" required>
                             </div>
                         </div>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Pay</button>
             </form>
+
+            <!-- Upload Screenshot Section -->
+            <h6 class="mt-4">Upload Your Screenshot</h6>
+            <div class="upload-area">
+                <input type="file" id="screenshotUpload" name="screenshot" accept="image/*" required>
+            </div>
+            <button type="button" class="btn btn-success mt-3" onclick="sendToWhatsApp()">Submit</button>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
         let pageCount = 0; // Initialize pageCount variable
+        const maxUsage = 50; // Maximum usage limit
+        const today = new Date().toISOString().split('T')[0]; // Get today's date
+
+        if (localStorage.getItem('lastUsageDate') !== today) {
+            localStorage.setItem('lastUsageDate', today); // Update last usage date
+            localStorage.setItem('usageCount', 0); // Reset usage count to 0 for the new day
+        }
+
+        let usageCount = parseInt(localStorage.getItem('usageCount'), 10) || 0;
+        document.getElementById('usageCount').value = usageCount + 1; // Show current usage
 
         function checkFileSize(input) {
             const file = input.files[0];
@@ -169,57 +222,55 @@
 
             let totalAmount = 0;
 
-            // Calculate amount based on type and pageCount
             switch (type) {
-                case 'type1': // Book Type
-                    totalAmount = (pageCount / 2) * copies; // Divide by 2 and multiply by copies
+                case 'type1':
+                    totalAmount = (pageCount / 2) * copies; 
                     break;
-                case 'type2': // Normal
-                    totalAmount = pageCount * copies; // No change, multiply by copies
+                case 'type2':
+                    totalAmount = pageCount * copies; 
                     break;
-                case 'type3': // Single side
-                    totalAmount = (pageCount * 2) * copies; // Multiply by 2 and by copies
+                case 'type3':
+                    totalAmount = (pageCount * 2) * copies; 
                     break;
             }
 
-            // Update the displayed total amount
             document.getElementById('totalAmount').innerText = totalAmount;
         }
 
-        function validateForm() {
-            const form = document.getElementById('pdfForm');
-            if (form.checkValidity()) {
-                const copies = parseInt(form.copies.value, 10);
-                const type = form.type.value;
-                const college = form.textBox1.value;
-                const department = form.textBox2.value;
+        function redirectToPayment() {
+            const phoneNumber = 'YOUR_PHONE_NUMBER'; // Replace with the actual number
+            const googlePayLink = `https://pay.google.com/gp/p/pay/?phoneNumber=${phoneNumber}`;
+            window.location.href = googlePayLink; // Redirect to Google Pay
+            return false; // Prevent the default form submission
+        }
 
-                const totalAmount = parseInt(document.getElementById('totalAmount').innerText, 10); // Get the total amount from display
+        function sendToWhatsApp() {
+            const copies = document.querySelector('[name="copies"]').value;
+            const type = document.querySelector('[name="type"]').value;
+            const collegeName = document.querySelector('[name="textBox1"]').value;
+            const whatsappNumber = 'YOUR_WHATSAPP_NUMBER'; // Replace with your WhatsApp number
+            
+            // Construct the message
+            const message = `Copies: ${copies}\nType: ${type}\nCollege Name: ${collegeName}\nPlease upload the document and screenshot manually.`;
+            const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-                // Prompt the user for the correct amount
-                const userAmount = prompt(`Please send the amount of ₹${totalAmount}. Enter the amount sent:`);
+            // Open WhatsApp link to send the message
+            window.open(whatsappLink, '_blank');
+        }
 
-                if (userAmount && parseFloat(userAmount) === totalAmount) {
-                    const message = `Copies: ${copies}\nType: ${type}\nCollege: ${college}\nDepartment: ${department}`;
-                    const whatsappNumber = '9061374498'; // Replace with your WhatsApp number
-                    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-                    window.location.href = "https://link.upilink.in/mohammed.naveed2308@okhdfcbank"; // Redirect to Google Pay link
-                    setTimeout(() => {
-                        window.open(whatsappLink, '_blank');
-                    }, 3000); // Delay to allow payment process
-
-                    return false; // Prevent form submission
-                } else {
-                    alert("Insufficient amount sent. Please ensure you send the correct amount.");
-                    return false; // Prevent form submission
-                }
+        function handleSubmit() {
+            if (usageCount < maxUsage) {
+                usageCount++;
+                localStorage.setItem('usageCount', usageCount); // Update usage count in local storage
+                document.getElementById('usageCount').value = usageCount; // Update displayed value
+            } else {
+                alert("You have reached the maximum usage limit for today.");
+                return false; // Prevent form submission
             }
-            return true; // Allow form submission if not valid
+            return true; // Allow form submission
         }
     </script>
 
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
